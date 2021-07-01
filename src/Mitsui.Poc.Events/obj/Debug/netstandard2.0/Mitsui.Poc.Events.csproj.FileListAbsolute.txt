@@ -1,0 +1,9 @@
+C:\Users\joaol\source\repos\EventDrivenArchitecturePoc\src\Mitsui.Poc.Events\bin\Debug\netstandard2.0\Mitsui.Poc.Events.deps.json
+C:\Users\joaol\source\repos\EventDrivenArchitecturePoc\src\Mitsui.Poc.Events\bin\Debug\netstandard2.0\Mitsui.Poc.Events.dll
+C:\Users\joaol\source\repos\EventDrivenArchitecturePoc\src\Mitsui.Poc.Events\bin\Debug\netstandard2.0\Mitsui.Poc.Events.pdb
+C:\Users\joaol\source\repos\EventDrivenArchitecturePoc\src\Mitsui.Poc.Events\obj\Debug\netstandard2.0\Mitsui.Poc.Events.AssemblyInfoInputs.cache
+C:\Users\joaol\source\repos\EventDrivenArchitecturePoc\src\Mitsui.Poc.Events\obj\Debug\netstandard2.0\Mitsui.Poc.Events.AssemblyInfo.cs
+C:\Users\joaol\source\repos\EventDrivenArchitecturePoc\src\Mitsui.Poc.Events\obj\Debug\netstandard2.0\Mitsui.Poc.Events.csproj.CoreCompileInputs.cache
+C:\Users\joaol\source\repos\EventDrivenArchitecturePoc\src\Mitsui.Poc.Events\obj\Debug\netstandard2.0\Mitsui.Poc.Events.dll
+C:\Users\joaol\source\repos\EventDrivenArchitecturePoc\src\Mitsui.Poc.Events\obj\Debug\netstandard2.0\Mitsui.Poc.Events.pdb
+C:\Users\joaol\source\repos\EventDrivenArchitecturePoc\src\Mitsui.Poc.Events\obj\Debug\netstandard2.0\Mitsui.Poc.Events.csprojAssemblyReference.cache
