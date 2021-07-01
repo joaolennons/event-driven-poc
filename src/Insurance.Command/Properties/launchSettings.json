@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Insurance.Command": {
+      "commandName": "Project",
+      "commandLineArgs": "host start --port 7074"
+    }
+  }
+}

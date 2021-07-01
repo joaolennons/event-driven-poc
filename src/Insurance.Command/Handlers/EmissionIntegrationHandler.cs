@@ -1,4 +1,5 @@
 using Insurance.Car;
+using Insurance.EventBroker;
 using Insurance.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
@@ -12,17 +13,21 @@ namespace Insurance.Query
     public class EmissionIntegrationHandler
     {
         private readonly HttpClient _client;
+        private readonly IEventBroker _eventBroker;
         private readonly IAggregateRootRepository _repository;
 
-        public EmissionIntegrationHandler(IHttpClientFactory httpClientFactory, IAggregateRootRepository repository)
+        public EmissionIntegrationHandler(IHttpClientFactory httpClientFactory, IEventBroker eventBroker, IAggregateRootRepository repository)
         {
             _repository = repository;
+            _eventBroker = eventBroker; 
             _client = httpClientFactory.CreateClient();
         }
 
 
         [FunctionName("EmissionIntegrationHandler")]
-        public async Task Run([QueueTrigger("QuotationEmissionHasBeeenRequested", Connection = "AzureWebJobsStorage")] string message, ILogger log)
+        public async Task Run([QueueTrigger("QuotationEmissionHasBeeenRequested", Connection = "AzureWebJobsStorage")] string message,
+            [Queue("QuotationUpdated", Connection = "AzureWebJobsStorage")] IAsyncCollector<string> topic,
+            ILogger log)
         {
             log.LogInformation($"EmissionIntegrationHandler function started: {message}.");
 
@@ -41,6 +46,7 @@ namespace Insurance.Query
             }
 
             await _repository.SaveEntityAsync(quotation);
+            await _eventBroker.Publish(new { QuotationId = quotation.Id, quotation.Status, quotation.Insured.Identity, quotation.Vehicle.LicensePlate, quotation.Plan.Value }, topic);
 
             log.LogInformation($"EmissionIntegrationHandler function finished.");
         }
