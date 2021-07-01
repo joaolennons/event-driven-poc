@@ -13,10 +13,19 @@ using Mitsui.Poc.Http.InputDto;
 
 namespace Mitsui.Poc.Http
 {
-    public static class QuotationHttpFuncs
+    public class QuotationHttpFuncs
     {
+        private readonly IAggregateRootRepository _repository;
+        private readonly IEventBroker _eventBroker;
+
+        public QuotationHttpFuncs(IAggregateRootRepository repository, IEventBroker eventBroker)
+        {
+            _repository = repository;
+            _eventBroker = eventBroker;
+        }
+
         [FunctionName(nameof(CreateDraft))]
-        public static async Task<IActionResult> CreateDraft(
+        public async Task<IActionResult> CreateDraft(
             [HttpTrigger(AuthorizationLevel.Function, HttpMethod.post, Route = "quotations")] HttpRequest req,
             [Queue(Resources.EventSourcing.Broker.Topics.QuotationUpdated, Connection = Resources.EventSourcing.Broker.ConnectionStringKey)] IAsyncCollector<string> topic,
             ILogger log)
@@ -31,11 +40,10 @@ namespace Mitsui.Poc.Http
 
                 if (quotation.IsValid())
                 {
-                    var repository = new QuotationRepository();
-                    hasBeenCreated = await repository.SaveQuotationAsync(quotation);
+                    hasBeenCreated = await _repository.SaveEntityAsync(quotation);
 
                     if (hasBeenCreated)
-                        await new EventBroker(topic).Publish(quotation.Changes.Last());
+                        await _eventBroker.Publish(quotation.Changes.Last(), topic);
                 }
 
                 if (hasBeenCreated)
@@ -50,7 +58,7 @@ namespace Mitsui.Poc.Http
         }
 
         [FunctionName(nameof(PatchQuotation))]
-        public static async Task<IActionResult> PatchQuotation(
+        public async Task<IActionResult> PatchQuotation(
             [HttpTrigger(AuthorizationLevel.Function, HttpMethod.patch, Route = "quotations")] HttpRequest req,
             [Queue(Resources.EventSourcing.Broker.Topics.QuotationUpdated, Connection = Resources.EventSourcing.Broker.ConnectionStringKey)] IAsyncCollector<string> topic,
             ILogger log)
@@ -59,17 +67,16 @@ namespace Mitsui.Poc.Http
             {
                 var dto = await req.GetRequestBody<QuotationInput>();
 
-                var repository = new QuotationRepository();
-                var quotation = await repository.LoadQuotationAsync<CarQuotation>(dto.QuotationId);
+                var quotation = await _repository.LoadEntityAsync<CarQuotation>(dto.QuotationId);
 
                 quotation.UpdateDraft(dto.Identity, dto.ZipCode, dto.MainDriver, dto.Chassis, dto.LicensePlate, dto.Questions);
                    
                 if (quotation.IsValid())
                 {
-                    var result = await repository.SaveQuotationAsync(quotation);
+                    var result = await _repository.SaveEntityAsync(quotation);
                     if (result)
                     {
-                        await new EventBroker(topic).Publish(quotation.Changes.Last());
+                        await _eventBroker.Publish(quotation.Changes.Last(), topic);
                     }
                 }
                     
@@ -82,7 +89,7 @@ namespace Mitsui.Poc.Http
         }
 
         [FunctionName(nameof(RequestQuotationCalc))]
-        public static async Task<IActionResult> RequestQuotationCalc(
+        public async Task<IActionResult> RequestQuotationCalc(
             [HttpTrigger(AuthorizationLevel.Function, HttpMethod.post, Route = "quotations/{id}/request-calculation")] HttpRequest req,
             [Queue(Resources.EventSourcing.Broker.Topics.QuotationPlanCalculationRequested, Connection = Resources.EventSourcing.Broker.ConnectionStringKey)] IAsyncCollector<string> topic,
             ILogger log)
@@ -91,15 +98,14 @@ namespace Mitsui.Poc.Http
             {
                 var dto = await req.GetRequestBody<QuotationInput>();
 
-                var repository = new QuotationRepository();
-                var quotation = await repository.LoadQuotationAsync<CarQuotation>(dto.QuotationId);
+                var quotation = await _repository.LoadEntityAsync<CarQuotation>(dto.QuotationId);
 
                 quotation.Calculate();
 
                 if (quotation.IsValid())
                 {
-                    await repository.SaveQuotationAsync(quotation);
-                    await new EventBroker(topic).Publish(quotation.Changes.Last());
+                    await _repository.SaveEntityAsync(quotation);
+                    await _eventBroker.Publish(quotation.Changes.Last(), topic);
                 }
 
                 return new OkObjectResult(quotation);
@@ -111,7 +117,7 @@ namespace Mitsui.Poc.Http
         }
 
         [FunctionName(nameof(RequestQuotationEmission))]
-        public static async Task<IActionResult> RequestQuotationEmission(
+        public async Task<IActionResult> RequestQuotationEmission(
             [HttpTrigger(AuthorizationLevel.Function, HttpMethod.post, Route = "quotations/{id}/request-emission")] HttpRequest req,
             [Queue(Resources.EventSourcing.Broker.Topics.QuotationEmissionHasBeeenRequested, Connection = Resources.EventSourcing.Broker.ConnectionStringKey)] IAsyncCollector<string> topic,
             ILogger log)
@@ -120,13 +126,12 @@ namespace Mitsui.Poc.Http
             {
                 var dto = await req.GetRequestBody<QuotationInput>();
 
-                var repository = new QuotationRepository();
-                var quotation = await repository.LoadQuotationAsync<CarQuotation>(dto.QuotationId);
+                var quotation = await _repository.LoadEntityAsync<CarQuotation>(dto.QuotationId);
 
                 if (quotation.RequestEmission())
                 {
-                    await repository.SaveQuotationAsync(quotation);
-                    await new EventBroker(topic).Publish(quotation.Changes.Last());
+                    await _repository.SaveEntityAsync(quotation);
+                    await _eventBroker.Publish(quotation.Changes.Last(), topic); ;
                 }
 
                 return new OkObjectResult(quotation);

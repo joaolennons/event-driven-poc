@@ -9,7 +9,8 @@ namespace Insurance.Query
     {
         public override void Configure(IFunctionsHostBuilder builder)
         {
-            builder.Services.AddHttpClient();
+            builder.Services.AddHttpClient()
+                .AddDomainDependencies();
         }
     }
 }

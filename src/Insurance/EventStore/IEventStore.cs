@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Insurance.Repositories
+namespace EventStore
 {
     public interface IEventStore
     {

@@ -12,9 +12,11 @@ namespace Insurance.Query
     public class NeurotechIntegrationHandler
     {
         private readonly HttpClient _client;
+        private readonly IAggregateRootRepository _repository;
 
-        public NeurotechIntegrationHandler(IHttpClientFactory httpClientFactory)
+        public NeurotechIntegrationHandler(IHttpClientFactory httpClientFactory, IAggregateRootRepository repository)
         {
+            _repository = repository;
             _client = httpClientFactory.CreateClient();
         }
 
@@ -27,8 +29,7 @@ namespace Insurance.Query
             var response = await _client.PostAsync("http://localhost:7073/api/Neurotech", new StringContent(message));
 
             var @event = JsonConvert.DeserializeObject<QuotationPlanCalculationHasBeenRequested>(message);
-            var repository = new QuotationRepository();
-            var quotation = await repository.LoadQuotationAsync<CarQuotation>(@event.QuotationId);
+            var quotation = await _repository.LoadEntityAsync<CarQuotation>(@event.QuotationId);
             
             if (response.IsSuccessStatusCode)
             {
@@ -40,7 +41,7 @@ namespace Insurance.Query
                 quotation.ReportError("Neurotech", await response.Content.ReadAsStringAsync());
             }
 
-            await repository.SaveQuotationAsync(quotation);
+            await _repository.SaveEntityAsync(quotation);
 
             log.LogInformation($"NeurotechIntegrationHandler function finished.");
         }

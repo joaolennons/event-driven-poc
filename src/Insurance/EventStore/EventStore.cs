@@ -1,5 +1,4 @@
-﻿using EventStore;
-using Microsoft.Azure.Cosmos;
+﻿using Microsoft.Azure.Cosmos;
 using Mitsui.Poc.Events;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -8,9 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Insurance.Repositories
+namespace EventStore
 {
-    public class EventStore : IEventStore
+    internal class EventStore : IEventStore
     {
         private readonly CosmosClient _client;
         private readonly string _databaseId = "mydatabase";
