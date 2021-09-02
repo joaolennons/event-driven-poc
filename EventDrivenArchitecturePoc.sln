@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mitsui.Poc.Http", "src\Mist
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mitsui.Poc.InterlockStubs", "src\Mitsui.Poc.InterlockStubs\Mitsui.Poc.InterlockStubs.csproj", "{116F2F14-0D6C-4983-82CB-6462784978B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Insurance.Command", "src\Insurance.Command\Insurance.Command.csproj", "{CBBC7CDA-84AA-46C4-9F9F-7C91045BC4C7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Insurance.Command", "src\Insurance.Command\Insurance.Command.csproj", "{CBBC7CDA-84AA-46C4-9F9F-7C91045BC4C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

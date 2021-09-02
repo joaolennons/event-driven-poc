@@ -36,12 +36,15 @@ namespace Mitsui.Poc.Http
 
                 bool hasBeenCreated = false; 
 
+                //o evento de domínio tá aqui
                 var quotation = new CarQuotation(dto.Identity, dto.ZipCode, dto.MainDriver, dto.Chassis, dto.LicensePlate, dto.Questions);
 
                 if (quotation.IsValid())
                 {
+                    //o event sourcing tá aqui
                     hasBeenCreated = await _repository.SaveEntityAsync(quotation);
 
+                    // o message broker tá aqui
                     if (hasBeenCreated)
                         await _eventBroker.Publish(quotation.Changes.Last(), topic);
                 }
@@ -67,15 +70,20 @@ namespace Mitsui.Poc.Http
             {
                 var dto = await req.GetRequestBody<QuotationInput>();
 
+                //aqui, o que vai ser carregado são todos os eventos que ocorreram nessa cotação
+                //a partir da leitura cronológica desses eventos, a entidade vai ser remontada no seu estado atual
                 var quotation = await _repository.LoadEntityAsync<CarQuotation>(dto.QuotationId);
 
+                //aqui está o evento de domínio
                 quotation.UpdateDraft(dto.Identity, dto.ZipCode, dto.MainDriver, dto.Chassis, dto.LicensePlate, dto.Questions);
                    
                 if (quotation.IsValid())
                 {
+                    //aqui, o novo evento é empilhado no event sourcing
                     var result = await _repository.SaveEntityAsync(quotation);
                     if (result)
                     {
+                        //aqui o evento é comunicado via message broker
                         await _eventBroker.Publish(quotation.Changes.Last(), topic);
                     }
                 }
@@ -98,13 +106,18 @@ namespace Mitsui.Poc.Http
             {
                 var dto = await req.GetRequestBody<QuotationInput>();
 
+                //aqui, o que vai ser carregado são todos os eventos que ocorreram nessa cotação
+                //a partir da leitura cronológica desses eventos, a entidade vai ser remontada no seu estado atual
                 var quotation = await _repository.LoadEntityAsync<CarQuotation>(dto.QuotationId);
 
+                //aqui está o evento de domínio
                 quotation.Calculate();
 
                 if (quotation.IsValid())
                 {
+                    //aqui o evento de solicitação de cálculo é empilhado no event sourcing
                     await _repository.SaveEntityAsync(quotation);
+                    //aqui o evento de solicitação de cálculo é comunicado via message broker
                     await _eventBroker.Publish(quotation.Changes.Last(), topic);
                 }
 
